@@ -13,7 +13,7 @@ Java 1.8
 Endpoints:
 
 (GET) /{KEY} 
-returns a JSON objects containing the URL saved with KEY
+returns a JSON object containing the URL saved with KEY
 
 (POST) /save/{URL}
 Saves URL and returns a key

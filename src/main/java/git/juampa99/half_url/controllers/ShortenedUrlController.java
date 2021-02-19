@@ -37,7 +37,7 @@ public class ShortenedUrlController {
 
     }
 
-    @RequestMapping(value = "/save/{url}/{key}", method = GET, produces = "application/json")
+    @RequestMapping(value = "/save/{url}/{key}", method = POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> saveUrl(@PathVariable String url, @PathVariable String key) {
 
