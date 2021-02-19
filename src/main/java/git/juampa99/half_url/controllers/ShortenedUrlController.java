@@ -4,12 +4,13 @@ import git.juampa99.half_url.domain.ShortenedUrl;
 import git.juampa99.half_url.services.ShortenedUrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @RestController
 public class ShortenedUrlController {
@@ -23,38 +24,42 @@ public class ShortenedUrlController {
         this.shortenedUrlService = shortenedUrlService;
     }
 
-    @RequestMapping(value = "/save/{url}", method = GET)
+    @RequestMapping(value = "/save/{url}", method = POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> saveUrl(@PathVariable String url) {
-        ShortenedUrl savedUrl = shortenedUrlService.save(url);
 
-        if(savedUrl != null)
-            return new ResponseEntity<>( savedUrl.getKey(), HttpStatus.OK );
-        else
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            ShortenedUrl savedUrl = shortenedUrlService.save(url);
+            return new ResponseEntity<>(Collections.singletonMap("key", savedUrl.getKey()) , HttpStatus.CREATED );
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
     }
 
-    @RequestMapping(value = "/save/{url}/{key}", method = GET)
+    @RequestMapping(value = "/save/{url}/{key}", method = GET, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> saveUrl(@PathVariable String url, @PathVariable String key) {
-        ShortenedUrl savedUrl = shortenedUrlService.save(url, key);
 
-        if(savedUrl != null)
-            return new ResponseEntity<>( savedUrl.getKey(), HttpStatus.OK );
-        else
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            ShortenedUrl savedUrl = shortenedUrlService.save(url, key);
+            return new ResponseEntity<>(Collections.singletonMap("key", savedUrl.getKey()) , HttpStatus.CREATED );
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
     }
 
-    @RequestMapping(value = "/{key}", method = GET)
+    @RequestMapping(value = "/{key}", method = GET, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> redirect(@PathVariable String key) {
-        String url = shortenedUrlService.getUrlByKey(key);
 
-        if(url != null)
-            return new ResponseEntity<>(url, HttpStatus.OK);
-        else
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            String url = shortenedUrlService.getUrlByKey(key);
+            return new ResponseEntity<>(Collections.singletonMap("url", url), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 }

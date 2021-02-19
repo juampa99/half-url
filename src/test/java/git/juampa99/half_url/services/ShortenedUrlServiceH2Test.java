@@ -51,8 +51,19 @@ class ShortenedUrlServiceH2Test {
     void validateKey() {
         boolean passedNull = shortenedUrlServiceH2.validateKey(null);
         boolean passedValidKey = shortenedUrlServiceH2.validateKey("000000");
+        boolean testMaxKeyLength = shortenedUrlServiceH2.validateKey("THISISVALID");
 
         assertFalse(passedNull);
         assertTrue(passedValidKey);
+        assertTrue(testMaxKeyLength);
+    }
+
+    @Test
+    void validateUrl() {
+        boolean googleValidation = shortenedUrlServiceH2.validateUrl("www.google.com");
+        boolean invalid = shortenedUrlServiceH2.validateUrl("a");
+
+        assertTrue(googleValidation);
+        assertFalse(invalid);
     }
 }

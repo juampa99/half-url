@@ -14,12 +14,14 @@ public interface ShortenedUrlService {
 
     public boolean validateKey(String key);
 
-    public ShortenedUrl save(ShortenedUrl shortenedUrl);
+    public ShortenedUrl save(ShortenedUrl shortenedUrl) throws RuntimeException;
 
-    public ShortenedUrl save(String originalUrl);
+    public ShortenedUrl save(String originalUrl) throws RuntimeException;
 
     public ShortenedUrl save(String originalUrl, String key) throws RuntimeException;
 
     public Iterable<ShortenedUrl> getAll();
+
+    public boolean validateUrl(String url);
 
 }
