@@ -1,6 +1,8 @@
 package git.juampa99.half_url.services;
 
 import git.juampa99.half_url.domain.ShortenedUrl;
+import git.juampa99.half_url.errors.InvalidKeyException;
+import git.juampa99.half_url.errors.InvalidUrlException;
 import git.juampa99.half_url.repositories.ShortenedUrlRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,14 +27,14 @@ public class ShortenedUrlServiceH2 implements ShortenedUrlService {
     }
 
     @Override
-    public String getUrlByKey(String key) throws RuntimeException {
+    public String getUrlByKey(String key) throws InvalidKeyException {
         Optional<ShortenedUrl> shortenedUrl = shortenedUrlRepository.findByKey(key);
         String url;
 
         if(shortenedUrl.isPresent())
             url = shortenedUrl.get().getOriginalUrl();
         else
-            throw new RuntimeException("Couldnt find url with key " + key);
+            throw new InvalidKeyException(key);
 
         return url;
     }
@@ -44,9 +46,9 @@ public class ShortenedUrlServiceH2 implements ShortenedUrlService {
         if(shortenedUrl == null)
             throw new RuntimeException("null ShortenedUrl object is not valid");
         if(!validateUrl(shortenedUrl.getOriginalUrl()))
-            throw new RuntimeException(shortenedUrl.getOriginalUrl() + " is not a valid URL");
+            throw new InvalidUrlException(shortenedUrl.getOriginalUrl());
         if(!validateKey(shortenedUrl.getKey()))
-            throw new RuntimeException(shortenedUrl.getOriginalUrl() + " is not a valid KEY");
+            throw new InvalidKeyException(shortenedUrl.getKey());
         else
             url = shortenedUrlRepository.save(shortenedUrl);
 
@@ -54,9 +56,9 @@ public class ShortenedUrlServiceH2 implements ShortenedUrlService {
     }
 
     @Override
-    public ShortenedUrl save(String originalUrl) throws RuntimeException {
+    public ShortenedUrl save(String originalUrl) throws InvalidUrlException {
         if(!validateUrl(originalUrl))
-            throw new RuntimeException(originalUrl + " is not a valid URL");
+            throw new InvalidUrlException(originalUrl);
 
         ShortenedUrl newShortenedUrl = new ShortenedUrl(originalUrl, generateKey());
 
@@ -64,11 +66,11 @@ public class ShortenedUrlServiceH2 implements ShortenedUrlService {
     }
 
     @Override
-    public ShortenedUrl save(String originalUrl, String key) throws RuntimeException {
+    public ShortenedUrl save(String originalUrl, String key) throws InvalidKeyException, InvalidUrlException {
         if(!validateKey(key))
-            throw new RuntimeException(key + " is not a valid key");
+            throw new InvalidKeyException(key);
         if(!validateUrl(originalUrl))
-            throw new RuntimeException(originalUrl + " is not a valid url");
+            throw new InvalidUrlException(originalUrl);
 
         ShortenedUrl newShortenedUrl = new ShortenedUrl(originalUrl, generateKey());
 
@@ -90,6 +92,9 @@ public class ShortenedUrlServiceH2 implements ShortenedUrlService {
         return matcher.find();
     }
 
+    /*
+    * Generates a 6 digit hex string
+    * */
     @Override
     public String generateKey() {
 
@@ -104,12 +109,15 @@ public class ShortenedUrlServiceH2 implements ShortenedUrlService {
         return key;
     }
 
+    /*
+    * Makes sure the KEY is between the predefined length bounds and that its unique (it doesnt already exists in the DB)
+    * */
     @Override
     public boolean validateKey(String key) {
         if(key == null)
             return false;
 
-        boolean isBetweenBounds = key.length() <= MAX_KEY_LENGTH;
+        boolean isBetweenBounds = key.length() <= MAX_KEY_LENGTH && key.length() > 0;
         boolean exists = shortenedUrlRepository.findByKey(key).isPresent();
 
         return isBetweenBounds && !exists;

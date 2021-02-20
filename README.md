@@ -29,4 +29,4 @@ GET  /5C2C5D               -> $ { "url": "www.example.com" }
 
 #### TODO
 
-* Add config support for different databases
+* More documentation (Javadocs)

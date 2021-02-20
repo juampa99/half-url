@@ -1,6 +1,8 @@
 package git.juampa99.half_url.controllers;
 
 import git.juampa99.half_url.domain.ShortenedUrl;
+import git.juampa99.half_url.errors.InvalidKeyException;
+import git.juampa99.half_url.errors.InvalidUrlException;
 import git.juampa99.half_url.services.ShortenedUrlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,11 @@ public class ShortenedUrlController {
         this.shortenedUrlService = shortenedUrlService;
     }
 
+    /*
+     * Takes an URL and saves it to the database, together with an automatically generated KEY.
+     * If the URL is not valid, returns an error
+     * */
+
     @RequestMapping(value = "/save/{url}", method = POST, produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> saveUrl(@PathVariable String url) {
@@ -31,11 +38,15 @@ public class ShortenedUrlController {
         try {
             ShortenedUrl savedUrl = shortenedUrlService.save(url);
             return new ResponseEntity<>(Collections.singletonMap("key", savedUrl.getKey()) , HttpStatus.CREATED );
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (InvalidUrlException e) {
+            return new ResponseEntity<>(Collections.singletonMap("error", "invalid url") , HttpStatus.NOT_FOUND);
         }
 
     }
+
+    /*
+    * Takes an URL and a KEY and saves it to the database, if either the URL or the KEY are not valid, returns an error
+    * */
 
     @RequestMapping(value = "/save/{url}/{key}", method = POST, produces = "application/json")
     @ResponseBody
@@ -44,11 +55,17 @@ public class ShortenedUrlController {
         try {
             ShortenedUrl savedUrl = shortenedUrlService.save(url, key);
             return new ResponseEntity<>(Collections.singletonMap("key", savedUrl.getKey()) , HttpStatus.CREATED );
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (InvalidKeyException e) {
+            return new ResponseEntity<>(Collections.singletonMap("error", "invalid key"), HttpStatus.NOT_FOUND);
+        } catch(InvalidUrlException e) {
+            return new ResponseEntity<>(Collections.singletonMap("error", "invalid url"), HttpStatus.NOT_FOUND);
         }
 
     }
+
+    /*
+    * Takes a KEY and returns its respective URL, if KEY does not exist in the database, returns an error
+    * */
 
     @RequestMapping(value = "/{key}", method = GET, produces = "application/json")
     @ResponseBody
@@ -57,8 +74,8 @@ public class ShortenedUrlController {
         try {
             String url = shortenedUrlService.getUrlByKey(key);
             return new ResponseEntity<>(Collections.singletonMap("url", url), HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (InvalidKeyException e) {
+            return new ResponseEntity<>(Collections.singletonMap("error", "invalid key") , HttpStatus.NOT_FOUND);
         }
 
     }
