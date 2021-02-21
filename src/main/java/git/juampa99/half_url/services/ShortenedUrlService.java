@@ -4,10 +4,10 @@ import git.juampa99.half_url.domain.ShortenedUrl;
 import git.juampa99.half_url.errors.InvalidKeyException;
 import git.juampa99.half_url.errors.InvalidUrlException;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
-@Component
+@Service
 public interface ShortenedUrlService {
 
     public String getUrlByKey(String key) throws InvalidKeyException;

@@ -7,8 +7,11 @@ import git.juampa99.half_url.repositories.ShortenedUrlRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Optional;
 
@@ -18,6 +21,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 class ShortenedUrlServiceH2Test {
+
+    private int HEX_LENGTH;
+    private int MAX_KEY_LENGTH;
 
     String VALID_URL = "www.google.com";
     String INVALID_URL = "a";
@@ -31,9 +37,12 @@ class ShortenedUrlServiceH2Test {
 
     @BeforeEach
     public void setup() {
+        this.HEX_LENGTH = 6;
+        this.MAX_KEY_LENGTH = 16;
+
         MockitoAnnotations.openMocks(this);
 
-        shortenedUrlServiceH2 = new ShortenedUrlServiceH2(shortenedUrlRepository);
+        shortenedUrlServiceH2 = new ShortenedUrlServiceH2(shortenedUrlRepository, HEX_LENGTH, MAX_KEY_LENGTH);
     }
 
     @Test

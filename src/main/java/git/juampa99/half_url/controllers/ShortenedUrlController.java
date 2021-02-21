@@ -5,6 +5,7 @@ import git.juampa99.half_url.errors.InvalidKeyException;
 import git.juampa99.half_url.errors.InvalidUrlException;
 import git.juampa99.half_url.services.ShortenedUrlService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class ShortenedUrlController {
     ShortenedUrlController() {}
 
     @Autowired
-    ShortenedUrlController(ShortenedUrlService shortenedUrlService) {
+    ShortenedUrlController(@Qualifier("shortenedUrlService") ShortenedUrlService shortenedUrlService) {
         this.shortenedUrlService = shortenedUrlService;
     }
 

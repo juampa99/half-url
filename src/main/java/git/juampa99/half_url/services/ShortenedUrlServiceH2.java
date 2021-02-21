@@ -4,26 +4,35 @@ import git.juampa99.half_url.domain.ShortenedUrl;
 import git.juampa99.half_url.errors.InvalidKeyException;
 import git.juampa99.half_url.errors.InvalidUrlException;
 import git.juampa99.half_url.repositories.ShortenedUrlRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Component
+@Service("shortenedUrlService")
+@Profile({"H2", "default"})
 public class ShortenedUrlServiceH2 implements ShortenedUrlService {
 
-    final private int MAX_KEY_LENGTH = 16;
-    final private int HEX_LENGTH = 6;
-    final private int MAX_HEX = (int) Math.pow(16, HEX_LENGTH);
 
-    private ShortenedUrlRepository shortenedUrlRepository;
+    private final int HEX_LENGTH;
+    private final int MAX_KEY_LENGTH;
+    private final int MAX_HEX_VALUE;
 
-    @Autowired
-    public ShortenedUrlServiceH2(ShortenedUrlRepository shortenedUrlRepository) {
+    private final ShortenedUrlRepository shortenedUrlRepository;
+
+    public ShortenedUrlServiceH2(ShortenedUrlRepository shortenedUrlRepository,
+                                 @Value("${keyconfig.HEX_LENGTH}") int HEX_LENGTH,
+                                 @Value("${keyconfig.MAX_KEY_LENGTH}") int MAX_KEY_LENGTH
+    ) {
         this.shortenedUrlRepository = shortenedUrlRepository;
+
+        this.HEX_LENGTH = HEX_LENGTH;
+        this.MAX_KEY_LENGTH = MAX_KEY_LENGTH;
+        this.MAX_HEX_VALUE = (int) Math.pow(16, HEX_LENGTH);
     }
 
     @Override
@@ -101,7 +110,7 @@ public class ShortenedUrlServiceH2 implements ShortenedUrlService {
         String key;
 
         do {
-            int randNum = ThreadLocalRandom.current().nextInt(1, MAX_HEX);
+            int randNum = ThreadLocalRandom.current().nextInt(1, MAX_HEX_VALUE);
             key = Integer.toHexString(randNum);
             key = hexToSixDigits(key);
         } while(!validateKey(key));
